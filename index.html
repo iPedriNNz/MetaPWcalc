@@ -50,12 +50,12 @@
             margin: 20px auto;
             padding: 10px;
             background-color: #f4f4f4;
-            color: #333;
+            color: #000;
             transition: background-color 0.3s, color 0.3s;
         }
         body.dark {
             background-color: #1a1a1a;
-            color: #e0e0e0;
+            color: #fff;
         }
         h1 {
             text-align: center;
@@ -113,9 +113,11 @@
             padding: 12px;
             text-align: center;
             border: 1px solid #ddd;
+            color: #000;
         }
         body.dark th, body.dark td {
             border-color: #444;
+            color: #fff;
         }
         th {
             background-color: #4CAF50;
@@ -152,6 +154,10 @@
             font-weight: bold;
             display: inline-flex;
             align-items: center;
+            color: #000;
+        }
+        body.dark label {
+            color: #fff;
         }
         select, input {
             padding: 10px;
@@ -160,13 +166,14 @@
             border-radius: 5px;
             font-size: 1em;
             background-color: #f9f9f9;
+            color: #000;
             width: calc(100% - 20px);
-            transition: background-color 0.3s, border-color 0.3s;
+            transition: background-color 0.3s, border-color 0.3s, color 0.3s;
         }
         body.dark select, body.dark input {
             background-color: #333;
             border-color: #555;
-            color: #e0e0e0;
+            color: #fff;
         }
         button {
             padding: 12px 24px;
@@ -200,7 +207,7 @@
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
             text-align: center;
         }
-        body.dark #resultado {
+        body.dark # rezultado {
             background-color: #2e7d32;
             color: #e8f5e9;
         }
@@ -211,7 +218,7 @@
             display: block;
         }
         body.dark .legenda {
-            color: #bbb;
+            color: #ccc;
         }
         .input-icon {
             width: 24px;
@@ -226,7 +233,7 @@
             color: #555;
         }
         body.dark footer {
-            color: #bbb;
+            color: #ccc;
         }
         /* Media Queries para Responsividade */
         @media (max-width: 600px) {
@@ -370,7 +377,46 @@
         Desenvolvido por PedroFerreira Dev
     </footer>
 
-    <script>
+    <script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+
         const dados = {
             1: { passados: 2, perolas: 0, lingotesOuro: 0 },
             2: { passados: 8, perolas: 4, lingotesOuro: 0 },
