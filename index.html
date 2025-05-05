@@ -207,7 +207,7 @@
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
             text-align: center;
         }
-        body.dark # rezultado {
+        body.dark #resultado {
             background-color: #2e7d32;
             color: #e8f5e9;
         }
@@ -235,7 +235,6 @@
         body.dark footer {
             color: #ccc;
         }
-        /* Media Queries para Responsividade */
         @media (max-width: 600px) {
             body {
                 padding: 10px;
@@ -306,7 +305,6 @@
         <button class="theme-toggle" onclick="toggleTheme()">Tema Escuro</button>
     </div>
     
-    <!-- Tabela -->
     <div class="table-container">
         <table id="tabela-refino">
             <thead>
@@ -319,7 +317,6 @@
                 </tr>
             </thead>
             <tbody>
-                <tr><td><img src="https://wikipw.com.br/images/thumb/8/84/P%C3%A9rola_do_Drag%C3%A3o_1_Estrela.png/85px-P%C3%A9rola_do_Drag%C3%A3o_1_Estrela.png" class="refino-img">+1</td><td>0</td><td>2</td><td class="custo-passados"></td><td class="custo-perolas"></td></tr>
                 <tr><td><img src="https://wikipw.com.br/images/thumb/1/14/P%C3%A9rola_do_Drag%C3%A3o_3_Estrelas.png/100px-P%C3%A9rola_do_Drag%C3%A3o_3_Estrelas.png" class="refino-img">+2</td><td>4</td><td>8</td><td class="custo-passados"></td><td class="custo-perolas"></td></tr>
                 <tr><td><img src="https://wikipw.com.br/images/thumb/f/f1/P%C3%A9rola_do_Drag%C3%A3o_2_Estrelas.png/100px-P%C3%A9rola_do_Drag%C3%A3o_2_Estrelas.png" class="refino-img">+3</td><td>10</td><td>20</td><td class="custo-passados"></td><td class="custo-perolas"></td></tr>
                 <tr><td><img src="https://wikipw.com.br/images/thumb/7/78/P%C3%A9rola_do_Drag%C3%A3o_4_Estrelas.png/100px-P%C3%A9rola_do_Drag%C3%A3o_4_Estrelas.png" class="refino-img">+4</td><td>25</td><td>50</td><td class="custo-passados"></td><td class="custo-perolas"></td></tr>
@@ -331,7 +328,6 @@
         </table>
     </div>
     
-    <!-- Calculadora -->
     <div class="calculadora">
         <h2>Calcular Custo</h2>
         <label for="valor-passado">
@@ -354,7 +350,6 @@
         
         <label for="refino">Nível de Refino:</label>
         <select id="refino">
-            <option value="1">+1</option>
             <option value="2">+2</option>
             <option value="3">+3</option>
             <option value="4">+4</option>
@@ -372,7 +367,6 @@
         <div id="resultado"></div>
     </div>
 
-    <!-- Rodapé -->
     <footer>
         Desenvolvido por PedroFerreira Dev
     </footer>
@@ -390,23 +384,15 @@
                 var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
                 var firstSheetName = workbook.SheetNames[0];
                 var worksheet = workbook.Sheets[firstSheetName];
-
-                // Convert sheet to JSON to filter blank rows
                 var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
-                // Filter out blank rows (rows where all cells are empty, null, or undefined)
                 var filteredData = jsonData.filter(row => row.some(filledCell));
-
-                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
                 var headerRowIndex = filteredData.findIndex((row, index) =>
                   row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
                 );
-                // Fallback
                 if (headerRowIndex === -1 || headerRowIndex > 25) {
                   headerRowIndex = 0;
                 }
-
-                // Convert filtered JSON back to CSV
-                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex));
                 csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
                 return csv;
             } catch (e) {
@@ -418,7 +404,6 @@
         }
 
         const dados = {
-            1: { passados: 2, perolas: 0, lingotesOuro: 0 },
             2: { passados: 8, perolas: 4, lingotesOuro: 0 },
             3: { passados: 20, perolas: 10, lingotesOuro: 0 },
             4: { passados: 50, perolas: 25, lingotesOuro: 0 },
@@ -444,9 +429,9 @@
             
             const linhas = document.querySelectorAll('#tabela-refino tbody tr');
             linhas.forEach((linha, index) => {
-                const refino = index + 1;
+                const refino = index + 2; // Começa do refino +2
                 const custoPassados = dados[refino].passados * valorPassado;
-                const custoPerolas = dados[refino].perolas * valorPerola;
+                const custoPerolas = 2 * dados[refino].perolas * valorPerola; // Multiplicador 2 para custo em pérolas
                 linha.querySelector('.custo-passados').textContent = formatarNumero(custoPassados);
                 linha.querySelector('.custo-perolas').textContent = formatarNumero(custoPerolas);
             });
@@ -469,7 +454,7 @@
             const lingotesOuro = dados[refino].lingotesOuro;
             const custoMoedas = metodo === 'passados' 
                 ? passados * valorPassado * quantidade 
-                : perolas * valorPerola * quantidade;
+                : 2 * perolas * valorPerola * quantidade; // Multiplicador 2 para custo em pérolas
             const totalLingotesOuro = lingotesOuro * quantidade;
 
             let resultado = `Custo Total: ${formatarNumero(custoMoedas)} para ${quantidade} pérola(s) no Refino +${refino} usando ${metodo === 'passados' ? 'Passados' : 'Pérolas 1*'}.`;
@@ -488,11 +473,9 @@
             button.textContent = document.body.classList.contains('dark') ? 'Tema Claro' : 'Tema Escuro';
         }
 
-        // Atualizar tabela ao mudar valores de Passado ou Pérola
         document.getElementById('valor-passado').addEventListener('input', atualizarTabela);
         document.getElementById('valor-perola').addEventListener('input', atualizarTabela);
         
-        // Inicializar tabela com valores padrão
         atualizarTabela();
     </script>
 </body>
