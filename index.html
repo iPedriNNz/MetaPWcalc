@@ -379,28 +379,28 @@
           return cell !== '' && cell != null;
         }
         function loadFileData(filename) {
-        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
-            try {
-                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
-                var firstSheetName = workbook.SheetNames[0];
-                var worksheet = workbook.Sheets[firstSheetName];
-                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
-                var filteredData = jsonData.filter(row => row.some(filledCell));
-                var headerRowIndex = filteredData.findIndex((row, index) =>
-                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
-                );
-                if (headerRowIndex === -1 || headerRowIndex > 25) {
-                  headerRowIndex = 0;
+            if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+                try {
+                    var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                    var firstSheetName = workbook.SheetNames[0];
+                    var worksheet = workbook.Sheets[firstSheetName];
+                    var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                    var filteredData = jsonData.filter(row => row.some(filledCell));
+                    var headerRowIndex = filteredData.findIndex((row, index) =>
+                      row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                    );
+                    if (headerRowIndex === -1 || headerRowIndex > 25) {
+                      headerRowIndex = 0;
+                    }
+                    var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex));
+                    csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                    return csv;
+                } catch (e) {
+                    console.error(e);
+                    return "";
                 }
-                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex));
-                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
-                return csv;
-            } catch (e) {
-                console.error(e);
-                return "";
             }
-        }
-        return gk_fileData[filename] || "";
+            return gk_fileData[filename] || "";
         }
 
         const dados = {
@@ -431,7 +431,7 @@
             linhas.forEach((linha, index) => {
                 const refino = index + 2; // Começa do refino +2
                 const custoPassados = dados[refino].passados * valorPassado;
-                const custoPerolas = 2 * dados[refino].perolas * valorPerola; // Multiplicador 2 para custo em pérolas
+                const custoPerolas = dados[refino].perolas * valorPerola; // Corrigido: removido multiplicador 2
                 linha.querySelector('.custo-passados').textContent = formatarNumero(custoPassados);
                 linha.querySelector('.custo-perolas').textContent = formatarNumero(custoPerolas);
             });
@@ -454,7 +454,7 @@
             const lingotesOuro = dados[refino].lingotesOuro;
             const custoMoedas = metodo === 'passados' 
                 ? passados * valorPassado * quantidade 
-                : 2 * perolas * valorPerola * quantidade; // Multiplicador 2 para custo em pérolas
+                : perolas * valorPerola * quantidade; // Corrigido: removido multiplicador 2
             const totalLingotesOuro = lingotesOuro * quantidade;
 
             let resultado = `Custo Total: ${formatarNumero(custoMoedas)} para ${quantidade} pérola(s) no Refino +${refino} usando ${metodo === 'passados' ? 'Passados' : 'Pérolas 1*'}.`;
